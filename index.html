@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RationNearMe - Check Before You Go</title>
+  <meta name="description" content="Check ration shop stock near you before you travel. See real-time availability of Rice, Wheat, Sugar, Dal, and Kerosene.">
+  
+  <!-- Leaflet CSS for Interactive OpenStreetMap -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <!-- Custom Modern Civic-Tech Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌾</text></svg>">
+</head>
+<body>
+
+  <!-- Top App Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <a href="#" class="brand-block" onclick="location.reload(); return false;">
+        <div class="brand-icon-wrap">🌾</div>
+        <div>
+          <div class="brand-title">RationNearMe</div>
+          <div class="brand-tagline">Check Before You Go</div>
+        </div>
+      </a>
+
+      <!-- Portal Switcher -->
+      <nav class="role-nav">
+        <button class="role-btn active" data-role="citizen">
+          <span>👥</span>
+          <span>Citizen Portal</span>
+        </button>
+        <button class="role-btn" data-role="shopkeeper">
+          <span>🏪</span>
+          <span>Shopkeeper Portal</span>
+        </button>
+        <button class="role-btn" data-role="admin">
+          <span>🛡️</span>
+          <span>Admin Audit</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- VIEW 1: CITIZEN VIEW (Default Public Experience) -->
+  <main id="citizen-view">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <div class="hero-pill">
+          <span>⚡</span>
+          <span>Zero Wasted Trips • Real-Time PDS Stock Availability</span>
+        </div>
+        <h1 class="hero-title">Don't Waste a Trip.</h1>
+        <p class="hero-subtitle">Check ration stock near you before you go.</p>
+      </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <div class="main-wrapper">
+      <!-- Search & Location Interface Card -->
+      <section class="search-card">
+        <div class="search-grid">
+          <!-- Location Input -->
+          <div class="form-group">
+            <label class="form-label" for="location-input">
+              <span>📍</span> Your Location / Area
+            </label>
+            <div class="input-with-action">
+              <select id="location-input" class="select-input">
+                <option value="kakkanad">📍 Kakkanad Civil Station, Kochi (682030)</option>
+                <option value="palarivattom">📍 Palarivattom Junction, Kochi (682025)</option>
+                <option value="vazhakkala">📍 Vazhakkala Temple Road, Kochi (682021)</option>
+                <option value="edappally">📍 Edappally Metro Station, Kochi (682024)</option>
+                <option value="thrikkakara">📍 Thrikkakara Municipality, Kochi (682021)</option>
+                <option value="kalamassery">📍 Kalamassery HMT Road, Kochi (683104)</option>
+              </select>
+              <button id="btn-use-gps" class="btn-icon-inside" title="Detect device GPS">
+                <span>🎯</span> Use My Location
+              </button>
+            </div>
+          </div>
+
+          <!-- Commodity / Item Selection -->
+          <div class="form-group">
+            <label class="form-label" for="item-select">
+              <span>📦</span> Select Item Needed
+            </label>
+            <select id="item-select" class="select-input">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+
+          <!-- Search Action -->
+          <button id="btn-search-main" class="btn-search">
+            <span>🔍</span> SEARCH STOCKS
+          </button>
+        </div>
+
+        <!-- Quick Item Chips -->
+        <div class="item-chips-container">
+          <div class="chips-label">Quick Select Commodity:</div>
+          <div id="item-chips-wrapper" class="chips-wrapper">
+            <!-- Dynamically populated chips -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Stock Summary Banner -->
+      <div id="stock-summary-banner" class="stock-summary-banner">
+        <!-- Dynamically populated -->
+      </div>
+
+      <!-- Controls Row: Filters & View Switcher -->
+      <div class="controls-header">
+        <div class="filter-pills">
+          <button class="filter-pill active" data-filter="all">All Shops</button>
+          <button class="filter-pill" data-filter="available">🟢 Available Only</button>
+          <button class="filter-pill" data-filter="low">🟠 Low Stock</button>
+          <button class="filter-pill" data-filter="out">🔴 Out of Stock</button>
+        </div>
+
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="split">
+            <span>📱</span> Split View
+          </button>
+          <button class="view-btn" data-view="list">
+            <span>📋</span> List Only
+          </button>
+          <button class="view-btn" data-view="map">
+            <span>🗺️</span> Map Only
+          </button>
+        </div>
+      </div>
+
+      <!-- Split Layout: Shop Cards + Interactive Map -->
+      <div id="content-container" class="layout-split">
+        <!-- Column 1: Shop Cards List -->
+        <div id="col-list">
+          <div id="shops-list-container" class="shops-list">
+            <!-- Dynamically populated shop cards -->
+          </div>
+        </div>
+
+        <!-- Column 2: Interactive Leaflet Map -->
+        <div id="col-map">
+          <div class="map-card-wrapper">
+            <div class="map-header-bar">
+              <span>Interactive Map View</span>
+              <div class="map-legend">
+                <span class="legend-item"><span style="color:#16a34a;">🟢</span> Avail</span>
+                <span class="legend-item"><span style="color:#ea580c;">🟠</span> Low</span>
+                <span class="legend-item"><span style="color:#dc2626;">🔴</span> Out</span>
+                <span class="legend-item"><span style="color:#64748b;">⚪</span> Outdated</span>
+              </div>
+            </div>
+            <div id="leaflet-map"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- VIEW 2: SHOPKEEPER DASHBOARD -->
+  <main id="shopkeeper-view" style="display: none;">
+    <div class="main-wrapper" style="margin-top: 24px;">
+      <div id="shopkeeper-dashboard-content">
+        <!-- Rendered by shopkeeper.js -->
+      </div>
+    </div>
+  </main>
+
+  <!-- VIEW 3: ADMIN VERIFICATION DASHBOARD -->
+  <main id="admin-view" style="display: none;">
+    <div class="main-wrapper" style="margin-top: 24px;">
+      <div id="admin-dashboard-content">
+        <!-- Rendered by admin.js -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Modals Container (Details, Directions, Alerts, Reports) -->
+  <div id="app-modal"></div>
+
+  <!-- Hackathon 1-Click Interactive Demo Floating Toolbar -->
+  <div id="hackathon-demo-bar" class="demo-floating-bar">
+    <!-- Populated by app.js setupDemoBar() -->
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div style="font-weight: 700; color: var(--text-main); margin-bottom: 4px;">
+      RationNearMe • National Food Security & PDS Transparency Initiative
+    </div>
+    <div>
+      "CHECK STOCK. CHECK LOCATION. SAVE YOUR TRIP." • Designed for Hackathon Demonstration
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="data.js"></script>
+  <script src="store.js"></script>
+  <script src="app.js"></script>
+  <script src="shopkeeper.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
